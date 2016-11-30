@@ -7,23 +7,23 @@ The goal of this project was to set up a sample Android app that uses Firebase a
 ### Figure 1a: Screenshot of app successfully deployed to AppEngine
 
 
-![1a](/Users/arthurlockman/Codebase/CS4518-Project-3/Screenshots/1a.png)
+![1a](Screenshots/1a.png)
 
 ### Figure 1b: Screenshot of android app running on device
 
-| Books channel                            | Music channel                            |
-| ---------------------------------------- | ---------------------------------------- |
-| ![1b](/Users/arthurlockman/Codebase/CS4518-Project-3/Screenshots/1b.png) | ![1b2](/Users/arthurlockman/Codebase/CS4518-Project-3/Screenshots/1b2.png) |
+| Books channel             | Music channel               |
+| ------------------------- | --------------------------- |
+| ![1b](Screenshots/1b.png) | ![1b2](Screenshots/1b2.png) |
 
 ### Figure 1c: Firebase DB
 
-| Firebase books channel data              | Firebase music channel data              |
-| ---------------------------------------- | ---------------------------------------- |
-| ![1c](/Users/arthurlockman/Codebase/CS4518-Project-3/Screenshots/1c.png) | ![1c2](/Users/arthurlockman/Codebase/CS4518-Project-3/Screenshots/1c2.png) |
+| Firebase books channel data | Firebase music channel data |
+| --------------------------- | --------------------------- |
+| ![1c](Screenshots/1c.png)   | ![1c2](Screenshots/1c2.png) |
 
 **Firebase Logs data**
 
-![Screen Shot 2016-11-30 at 09.59.32](/Users/arthurlockman/Codebase/CS4518-Project-3/Screenshots/1c3.png)
+![Screen Shot 2016-11-30 at 09.59.32](Screenshots/1c3.png)
 
 ### 3.1.3: Explain the data stored in the Firebase database
 
