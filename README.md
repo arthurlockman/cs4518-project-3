@@ -155,3 +155,28 @@ public void onChildAdded(DataSnapshot snapshot, String prevKey) {
 }
 ```
 
+### 3.3.1: Document how the client-side workload is being distributed to servlets
+
+The client side workload is being distributed to servlets using Firebase as intermediate layer. First, when the client has connected to Firebase successfully it generates an inbox ID which will be used to identify itself to the servlet and the database event logger. When the client logs in and authenticates with the Google authentication API, the client calls the `requestLogger()` method. This method configures the new inbox channel in the Firebase database, and then adds a new child value to the `requestLogger` child element in the database with its inbox ID as a value. 
+
+```java
+firebase.child(REQLOG).push().setValue(inbox);
+```
+
+On the servlet side, at servlet manager creation a listener is set up on the Firebase database on the `requestLogger` element to listen for and handle all changes. When the client adds a new value to that element the server picks it up and selects the servlet instance to assign the client to. The transaction that takes place will select which of the first servlets are available, and assign that one to the client. It replies to the client with its ID, notifying the client which servlet inbox to put data into. Finally this listener removes the request from the `requestLogger` element so that it does not get picked up by another servlet by mistake.
+
+```java
+firebase.child(REQLOG).addChildEventListener(new ChildEventListener() {
+  public void onChildAdded(DataSnapshot snapshot, String prevKey) {
+    firebase.child(IBX + "/" + snapshot.getValue()).runTransaction(new Transaction.Handler() {
+      public Transaction.Result doTransaction(MutableData currentData) {
+        // The only first Servlet instance will write
+        // its ID to the client inbox.
+        if (currentData.getValue() == null) { currentData.setValue(inbox); }
+        return Transaction.success(currentData);
+      }
+
+      public void onComplete(DatabaseError error, boolean committed, DataSnapshot snapshot) {}
+    });
+```
+
