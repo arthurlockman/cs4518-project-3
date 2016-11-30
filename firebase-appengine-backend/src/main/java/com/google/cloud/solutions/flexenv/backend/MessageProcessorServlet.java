@@ -235,10 +235,10 @@ public class MessageProcessorServlet extends HttpServlet {
    * @param newLine The new log entry to add to the log file.
    */
   private void appendToGCSLogFile(LogEntry newLine) {
-    String fileContents = readFileFromGCS();
+    String fileContents = readFileFromGCS(); // Read GCS log file
     fileContents += new Date(newLine.getTimeLong()).toString() + "(id=" + newLine.getTag()
-        + ")" +  " : " + newLine.getLog() + "\n";
-        writeFileToGCS(fileContents);
+        + ")" +  " : " + newLine.getLog() + "\n"; //Append to existing data
+    writeFileToGCS(fileContents); //Write new file to GCS
   }
 
   /**
@@ -248,13 +248,13 @@ public class MessageProcessorServlet extends HttpServlet {
    * @param fileContents The contents to write to the file.
    */
   private void writeFileToGCS(String fileContents) {
-    GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
-    GcsFilename fileName = getFileName();
-    GcsOutputChannel outputChannel;
+    GcsFileOptions instance = GcsFileOptions.getDefaultInstance(); // get default instance of GCS
+    GcsFilename fileName = getFileName(); // Get GCS filename to write to
+    GcsOutputChannel outputChannel; //Create an output channel
     try {
-      outputChannel = gcsService.createOrReplace(fileName, instance);
+      outputChannel = gcsService.createOrReplace(fileName, instance); //Get an output channel for the desired filename
       InputStream is = new ByteArrayInputStream(fileContents.getBytes("UTF-8"));
-      copy(is, Channels.newOutputStream(outputChannel));
+      copy(is, Channels.newOutputStream(outputChannel)); //Copy string to the file output
     } catch (IOException e) {
 
     }
@@ -266,16 +266,16 @@ public class MessageProcessorServlet extends HttpServlet {
    * Adapted from https://github.com/GoogleCloudPlatform/appengine-gcs-client/blob/master/java/example/src/main/java/com/google/appengine/demos/GcsExampleServlet.java
    */
   private String readFileFromGCS() {
-    GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(getFileName(), 0, BUFFER_SIZE);
+    GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(getFileName(), 0, BUFFER_SIZE); // Create a channel to read from
     StringWriter writer = new StringWriter();
     String fileContents = "";
     try {
-      IOUtils.copy(Channels.newInputStream(readChannel), writer, "UTF-8");
+      IOUtils.copy(Channels.newInputStream(readChannel), writer, "UTF-8"); //Copy contents of GCS file to string
       fileContents = writer.toString();
     } catch (IOException e) {
 
     }
-    return fileContents;
+    return fileContents; //Return read string
   }
 
   /**
