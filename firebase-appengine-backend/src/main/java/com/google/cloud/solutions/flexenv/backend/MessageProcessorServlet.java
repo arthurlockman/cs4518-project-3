@@ -52,6 +52,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
+import java.io.StringWriter;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * MessageProcessorServlet is responsible for receiving user event logs
@@ -83,7 +86,6 @@ public class MessageProcessorServlet extends HttpServlet {
   private ConcurrentLinkedQueue<LogEntry> logs;
 
   //Vars for google cloud storage
-  public static final boolean SERVE_USING_BLOBSTORE_API = false;
   private final GcsService gcsService = GcsServiceFactory.createGcsService(new RetryParams.Builder()
     .initialRetryDelayMillis(10)
     .retryMaxAttempts(10)
@@ -179,6 +181,7 @@ public class MessageProcessorServlet extends HttpServlet {
         if (snapshot.exists()) {
           LogEntry entry = snapshot.getValue(LogEntry.class);
           logs.add(entry);
+          appendToGCSLogFile(entry); //Save log information to Google Cloud Storage
         }
       }
 
@@ -222,6 +225,28 @@ public class MessageProcessorServlet extends HttpServlet {
     firebase.child(IBX + "/" + inbox).removeValue();
   }
 
+
+  //METHODS BELOW HERE HANDLE GOOGLE CLOUD STORAGE
+
+  /**
+   * This method downloads the log file from GCS, appends data to it, and re-writes it back to the server. 
+   * This ensures that the log information is not destroyed each time the servelet starts up, and 
+   * is not overwritten.
+   * @param newLine The new log entry to add to the log file.
+   */
+  private void appendToGCSLogFile(LogEntry newLine) {
+    String fileContents = readFileFromGCS();
+    fileContents += new Date(newLine.getTimeLong()).toString() + "(id=" + newLine.getTag()
+        + ")" +  " : " + newLine.getLog() + "\n";
+        writeFileToGCS(fileContents);
+  }
+
+  /**
+   * This method writes a file to GCS with given contents. It automatically gets
+   * the proper filename for this servelet from the getFileName() method.
+   * Adapted from https://github.com/GoogleCloudPlatform/appengine-gcs-client/blob/master/java/example/src/main/java/com/google/appengine/demos/GcsExampleServlet.java
+   * @param fileContents The contents to write to the file.
+   */
   private void writeFileToGCS(String fileContents) {
     GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
     GcsFilename fileName = getFileName();
@@ -233,6 +258,24 @@ public class MessageProcessorServlet extends HttpServlet {
     } catch (IOException e) {
 
     }
+  }
+
+  /**
+   * This method reads a file to GCS with given contents. It automatically gets
+   * the proper filename for this servelet from the getFileName() method.
+   * Adapted from https://github.com/GoogleCloudPlatform/appengine-gcs-client/blob/master/java/example/src/main/java/com/google/appengine/demos/GcsExampleServlet.java
+   */
+  private String readFileFromGCS() {
+    GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(getFileName(), 0, BUFFER_SIZE);
+    StringWriter writer = new StringWriter();
+    String fileContents = "";
+    try {
+      IOUtils.copy(Channels.newInputStream(readChannel), writer, "UTF-8");
+      fileContents = writer.toString();
+    } catch (IOException e) {
+
+    }
+    return fileContents;
   }
 
   /**

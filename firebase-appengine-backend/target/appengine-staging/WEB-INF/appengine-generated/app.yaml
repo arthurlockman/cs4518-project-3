@@ -7,7 +7,7 @@ inbound_services:
 threadsafe: True
 auto_id_policy: default
 beta_settings:
-  'source_reference': 'https://github.com/GoogleCloudPlatform/firebase-appengine-backend#e61dad77c5828102b125bff3ca4e4950ab4b0655'
+  'source_reference': 'https://github.com/arthurlockman/cs4518-project-3.git#43c7abbd37ec98b1eb66910f8e05dfa61dcef943'
 health_check:
   enable_health_check: True
 api_version: '1.0'
